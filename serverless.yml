@@ -1,0 +1,17 @@
+service: saint-of-the-day-webservice
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: us-east-1
+package:
+  include:
+    - src/data/calendar.json
+functions:
+  app:
+    handler: handler.handler
+    events:
+      - http:
+          path: /get-day-info
+          method: get
+plugins:
+  - serverless-offline
