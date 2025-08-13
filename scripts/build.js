@@ -1,4 +1,3 @@
-// Simple build script to copy src/* to dist/
 const fs = require('fs');
 const path = require('path');
 
@@ -24,4 +23,17 @@ function copyRecursiveSync(src, dest) {
 }
 
 copyRecursiveSync(srcDir, distDir);
-console.log('Build complete: src files and directories copied to dist/');
+fs.copyFileSync(path.join(__dirname, '../package.json'), path.join(distDir, 'package.json'));
+
+const { execSync } = require('child_process');
+execSync('npm install --production', { cwd: distDir, stdio: 'inherit' });
+execSync('powershell Compress-Archive -Path * -DestinationPath lambda.zip -Force', { cwd: distDir, stdio: 'inherit' });
+
+// Remove all files/folders in dist except lambda.zip
+ds = fs.readdirSync(distDir);
+ds.forEach(item => {
+  if (item !== 'lambda.zip') {
+    const itemPath = path.join(distDir, item);
+    fs.rmSync(itemPath, { recursive: true, force: true });
+  }
+});

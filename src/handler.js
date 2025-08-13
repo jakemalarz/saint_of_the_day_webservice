@@ -1,7 +1,6 @@
-const awsServerlessExpress = require('aws-serverless-express');
+const serverlessExpress = require('@vendia/serverless-express');
 const app = require('./app');
-const server = awsServerlessExpress.createServer(app);
 
-exports.handler = (event, context) => {
-  awsServerlessExpress.proxy(server, event, context);
-};
+const server = serverlessExpress.createServer(app)
+
+exports.handler = (event, context) => serverlessExpress.proxy(server, event, context);

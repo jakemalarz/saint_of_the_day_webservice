@@ -53,4 +53,23 @@ describe('GET /get-day-info', () => {
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual(fakeEntry);
   });
+
+  // Root route should use the same handler behavior
+  it('root / should return 400 if date is missing', async () => {
+    validateDate.mockReturnValue({ isValid: false, error: 'Missing date parameter' });
+    const res = await request(app).get('/');
+    expect(validateDate).toHaveBeenCalledWith(undefined);
+    expect(res.statusCode).toBe(400);
+    expect(res.body).toEqual({ error: 'Missing date parameter' });
+  });
+
+  it('root / should return 200 and the calendar entry for a valid date', async () => {
+    const testDate = '12-25-2025';
+    const fakeEntry = { date: testDate, saint: 'Nativity of the Lord', description: 'Christmas.' };
+    validateDate.mockReturnValue({ isValid: true });
+    getDayInfoByDate.mockReturnValue({ entry: fakeEntry, error: null });
+    const res = await request(app).get(`/?date=${testDate}`);
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual(fakeEntry);
+  });
 });

@@ -3,15 +3,17 @@ const express = require('express');
 const cors = require('cors');
 const { validateDate } = require('./utils/dateValidator');
 const app = express();
+const defaultPort = process.env.PORT || 3000;
 app.use(cors());
 
 // Simple GET endpoint: /get-day-info?date=MM-DD-YYYY
 const { getDayInfoByDate } = require('./utils/calendarData');
 
-app.get('/get-day-info', (req, res) => {
+// Shared handler for fetching day info by `date` query param
+const getHandler = (req, res) => {
   const { date } = req.query;
   const { isValid, error } = validateDate(date);
-  
+
   if (!isValid) {
     return res.status(400).json({ error });
   }
@@ -22,10 +24,13 @@ app.get('/get-day-info', (req, res) => {
     const status = calendarError.includes('No entry found') ? 404 : 500;
     return res.status(status).json({ error: calendarError });
   }
-  res.json(entry);
-});
+  return res.json(entry);
+};
 
-defaultPort = process.env.PORT || 3000;
+// Routes
+app.get('/get-day-info', getHandler);
+app.get('/', getHandler);
+
 if (require.main === module) {
   app.listen(defaultPort, () => {
     console.log(`Express app listening on port ${defaultPort}`);
